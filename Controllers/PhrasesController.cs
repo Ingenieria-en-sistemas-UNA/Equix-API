@@ -25,7 +25,7 @@ namespace EquixAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Phrase>>> GetPhrase()
         {
-            return await _context.Phrases.ToListAsync();
+            return await _context.Phrases.Include(x => x.Category).Include(x => x.Author).ToListAsync();
         }
 
         // GET: api/Phrases/5
@@ -76,6 +76,18 @@ namespace EquixAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Phrase>> PostPhrase(Phrase phrase)
         {
+            var author = await _context.Authors.FindAsync(phrase.AuthorId);
+            if( author == null)
+            {
+                return BadRequest();
+            }
+            var category = await _context.Categories.FindAsync(phrase.CategoryId);
+            if (category == null)
+            {
+                return BadRequest();
+            }
+            phrase.Author = author;
+            phrase.Category = category;
             _context.Phrases.Add(phrase);
             await _context.SaveChangesAsync();
 

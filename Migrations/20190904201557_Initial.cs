@@ -42,7 +42,7 @@ namespace EquixAPI.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Description = table.Column<string>(nullable: true),
                     CreatedAt = table.Column<DateTime>(nullable: false),
-                    categoryId = table.Column<int>(nullable: true),
+                    CategoryId = table.Column<int>(nullable: false),
                     AuthorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -55,11 +55,11 @@ namespace EquixAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Phrases_Categories_categoryId",
-                        column: x => x.categoryId,
+                        name: "FK_Phrases_Categories_CategoryId",
+                        column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -68,9 +68,9 @@ namespace EquixAPI.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Phrases_categoryId",
+                name: "IX_Phrases_CategoryId",
                 table: "Phrases",
-                column: "categoryId");
+                column: "CategoryId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

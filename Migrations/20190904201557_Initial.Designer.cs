@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EquixAPI.Migrations
 {
     [DbContext(typeof(EquixAPIContext))]
-    [Migration("20190904190826_Initial")]
+    [Migration("20190904201557_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,17 +55,17 @@ namespace EquixAPI.Migrations
 
                     b.Property<int>("AuthorId");
 
+                    b.Property<int>("CategoryId");
+
                     b.Property<DateTime>("CreatedAt");
 
                     b.Property<string>("Description");
-
-                    b.Property<int?>("categoryId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("categoryId");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Phrases");
                 });
@@ -77,9 +77,10 @@ namespace EquixAPI.Migrations
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("EquixAPI.Entities.Category", "category")
+                    b.HasOne("EquixAPI.Entities.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("categoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

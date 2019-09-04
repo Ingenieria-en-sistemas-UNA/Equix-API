@@ -25,7 +25,7 @@ namespace EquixAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
         {
-            return await _context.Authors.ToListAsync();
+            return await _context.Authors.Include(x => x.phrases).ToListAsync();
         }
 
         // GET: api/Authors/5
