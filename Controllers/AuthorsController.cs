@@ -10,23 +10,22 @@ using EquixAPI.Models;
 
 namespace EquixAPI.Controllers
 {
-    public class PhrasesController : Controller
+    public class AuthorsController : Controller
     {
         private readonly EquixAPIContext _context;
 
-        public PhrasesController(EquixAPIContext context)
+        public AuthorsController(EquixAPIContext context)
         {
             _context = context;
         }
 
-        // GET: Phrases
+        // GET: Authors
         public async Task<IActionResult> Index()
         {
-            var equixAPIContext = _context.Phrase.Include(p => p.Author);
-            return View(await equixAPIContext.ToListAsync());
+            return View(await _context.Author.ToListAsync());
         }
 
-        // GET: Phrases/Details/5
+        // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,42 +33,39 @@ namespace EquixAPI.Controllers
                 return NotFound();
             }
 
-            var phrase = await _context.Phrase
-                .Include(p => p.Author)
+            var author = await _context.Author
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (phrase == null)
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return View(phrase);
+            return View(author);
         }
 
-        // GET: Phrases/Create
+        // GET: Authors/Create
         public IActionResult Create()
         {
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id");
             return View();
         }
 
-        // POST: Phrases/Create
+        // POST: Authors/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Description,CreatedAt,AuthorId")] Phrase phrase)
+        public async Task<IActionResult> Create([Bind("Id,name")] Author author)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(phrase);
+                _context.Add(author);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
+            return View(author);
         }
 
-        // GET: Phrases/Edit/5
+        // GET: Authors/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,23 +73,22 @@ namespace EquixAPI.Controllers
                 return NotFound();
             }
 
-            var phrase = await _context.Phrase.FindAsync(id);
-            if (phrase == null)
+            var author = await _context.Author.FindAsync(id);
+            if (author == null)
             {
                 return NotFound();
             }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
+            return View(author);
         }
 
-        // POST: Phrases/Edit/5
+        // POST: Authors/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,CreatedAt,AuthorId")] Phrase phrase)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,name")] Author author)
         {
-            if (id != phrase.Id)
+            if (id != author.Id)
             {
                 return NotFound();
             }
@@ -102,12 +97,12 @@ namespace EquixAPI.Controllers
             {
                 try
                 {
-                    _context.Update(phrase);
+                    _context.Update(author);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PhraseExists(phrase.Id))
+                    if (!AuthorExists(author.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +113,10 @@ namespace EquixAPI.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
+            return View(author);
         }
 
-        // GET: Phrases/Delete/5
+        // GET: Authors/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,31 +124,30 @@ namespace EquixAPI.Controllers
                 return NotFound();
             }
 
-            var phrase = await _context.Phrase
-                .Include(p => p.Author)
+            var author = await _context.Author
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (phrase == null)
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return View(phrase);
+            return View(author);
         }
 
-        // POST: Phrases/Delete/5
+        // POST: Authors/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var phrase = await _context.Phrase.FindAsync(id);
-            _context.Phrase.Remove(phrase);
+            var author = await _context.Author.FindAsync(id);
+            _context.Author.Remove(author);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PhraseExists(int id)
+        private bool AuthorExists(int id)
         {
-            return _context.Phrase.Any(e => e.Id == id);
+            return _context.Author.Any(e => e.Id == id);
         }
     }
 }
