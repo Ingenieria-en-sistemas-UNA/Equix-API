@@ -17,5 +17,7 @@ namespace EquixAPI.Models
         public DbSet<EquixAPI.Entities.Phrase> Phrase { get; set; }
 
         public DbSet<EquixAPI.Entities.Author> Author { get; set; }
+
+        public DbSet<EquixAPI.Entities.Category> Category { get; set; }
     }
 }
