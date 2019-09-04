@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Models;
 using EquixAPI.Hubs;
+using AutoMapper;
 
 namespace EquixAPI
 {
@@ -36,6 +37,8 @@ namespace EquixAPI
                     options.UseSqlServer(Configuration.GetConnectionString("EquixAPIContext")));
 
             services.AddSignalR();
+
+            services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

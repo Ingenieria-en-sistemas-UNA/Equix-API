@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EquixAPI.Entities
+namespace EquixAPI.Models
 {
-    public class Author
+    public class OutAuthorDTO
     {
         public int Id { get; set; }
-
         public string Name { get; set; }
 
-        public List<Phrase> Phrases { get; set; }
+        public List<OutPhraseDTO> OutPhraseDTOs { get; set; }
     }
 }

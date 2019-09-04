@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
+using AutoMapper;
 
 namespace EquixAPI.Controllers
 {
@@ -15,17 +16,21 @@ namespace EquixAPI.Controllers
     public class PhrasesController : ControllerBase
     {
         private readonly EquixAPIContext _context;
+        private readonly IMapper _mapper;
 
-        public PhrasesController(EquixAPIContext context)
+        public PhrasesController(EquixAPIContext context, IMapper mapper)
         {
             _context = context;
+            this._mapper = mapper;
         }
 
         // GET: api/Phrases
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Phrase>>> GetPhrase()
+        public async Task<ActionResult<IEnumerable<OutPhraseDTO>>> GetPhrase()
         {
-            return await _context.Phrases.Include(x => x.Category).Include(x => x.Author).ToListAsync();
+            var phrases =  await _context.Phrases.Include(x => x.Category).Include(x => x.Author).ToListAsync();
+            return _mapper.Map<List<OutPhraseDTO>>(phrases);
+
         }
 
         // GET: api/Phrases/5
@@ -44,13 +49,10 @@ namespace EquixAPI.Controllers
 
         // PUT: api/Phrases/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPhrase(int id, Phrase phrase)
+        public async Task<IActionResult> PutPhrase(int id, InPhraseDTO inPhraseDTO)
         {
-            if (id != phrase.Id)
-            {
-                return BadRequest();
-            }
-
+            var phrase = _mapper.Map<Phrase>(inPhraseDTO);
+            phrase.Id = id;
             _context.Entry(phrase).State = EntityState.Modified;
 
             try
@@ -74,29 +76,30 @@ namespace EquixAPI.Controllers
 
         // POST: api/Phrases
         [HttpPost]
-        public async Task<ActionResult<Phrase>> PostPhrase(Phrase phrase)
+        public async Task<ActionResult<OutPhraseDTO>> PostPhrase([FromBody] InPhraseDTO inPhraseDTO)
         {
-            var author = await _context.Authors.FindAsync(phrase.AuthorId);
-            if( author == null)
-            {
-                return BadRequest();
-            }
-            var category = await _context.Categories.FindAsync(phrase.CategoryId);
-            if (category == null)
-            {
-                return BadRequest();
-            }
-            phrase.Author = author;
-            phrase.Category = category;
+            var phrase = _mapper.Map<Phrase>(inPhraseDTO);
+            //var author = await _context.Authors.FindAsync(phrase.AuthorId);
+            //if( author == null)
+            //{
+            //    return BadRequest();
+            //}
+            //var category = await _context.Categories.FindAsync(phrase.CategoryId);
+            //if (category == null)
+            //{
+            //    return BadRequest();
+            //}
+            //phrase.Author = author;
+            //phrase.Category = category;
             _context.Phrases.Add(phrase);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPhrase", new { id = phrase.Id }, phrase);
+            return CreatedAtAction("GetPhrase", new { id = phrase.Id }, _mapper.Map<OutPhraseDTO>(phrase));
         }
 
         // DELETE: api/Phrases/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Phrase>> DeletePhrase(int id)
+        public async Task<ActionResult<OutPhraseDTO>> DeletePhrase(int id)
         {
             var phrase = await _context.Phrases.FindAsync(id);
             if (phrase == null)
@@ -107,7 +110,7 @@ namespace EquixAPI.Controllers
             _context.Phrases.Remove(phrase);
             await _context.SaveChangesAsync();
 
-            return phrase;
+            return _mapper.Map<OutPhraseDTO>(phrase);
         }
 
         private bool PhraseExists(int id)
