@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
 
 namespace EquixAPI.Controllers
 {
-    public class PhrasesController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PhrasesController : ControllerBase
     {
         private readonly EquixAPIContext _context;
 
@@ -19,142 +21,86 @@ namespace EquixAPI.Controllers
             _context = context;
         }
 
-        // GET: Phrases
-        public async Task<IActionResult> Index()
+        // GET: api/Phrases
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Phrase>>> GetPhrase()
         {
-            var equixAPIContext = _context.Phrase.Include(p => p.Author);
-            return View(await equixAPIContext.ToListAsync());
+            return await _context.Phrases.ToListAsync();
         }
 
-        // GET: Phrases/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Phrases/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Phrase>> GetPhrase(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var phrase = await _context.Phrases.FindAsync(id);
 
-            var phrase = await _context.Phrase
-                .Include(p => p.Author)
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (phrase == null)
             {
                 return NotFound();
             }
 
-            return View(phrase);
+            return phrase;
         }
 
-        // GET: Phrases/Create
-        public IActionResult Create()
-        {
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id");
-            return View();
-        }
-
-        // POST: Phrases/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Description,CreatedAt,AuthorId")] Phrase phrase)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(phrase);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
-        }
-
-        // GET: Phrases/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var phrase = await _context.Phrase.FindAsync(id);
-            if (phrase == null)
-            {
-                return NotFound();
-            }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
-        }
-
-        // POST: Phrases/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,CreatedAt,AuthorId")] Phrase phrase)
+        // PUT: api/Phrases/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPhrase(int id, Phrase phrase)
         {
             if (id != phrase.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(phrase).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(phrase);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PhraseExists(phrase.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            ViewData["AuthorId"] = new SelectList(_context.Set<Author>(), "Id", "Id", phrase.AuthorId);
-            return View(phrase);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PhraseExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Phrases/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/Phrases
+        [HttpPost]
+        public async Task<ActionResult<Phrase>> PostPhrase(Phrase phrase)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            _context.Phrases.Add(phrase);
+            await _context.SaveChangesAsync();
 
-            var phrase = await _context.Phrase
-                .Include(p => p.Author)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return CreatedAtAction("GetPhrase", new { id = phrase.Id }, phrase);
+        }
+
+        // DELETE: api/Phrases/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Phrase>> DeletePhrase(int id)
+        {
+            var phrase = await _context.Phrases.FindAsync(id);
             if (phrase == null)
             {
                 return NotFound();
             }
 
-            return View(phrase);
-        }
-
-        // POST: Phrases/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var phrase = await _context.Phrase.FindAsync(id);
-            _context.Phrase.Remove(phrase);
+            _context.Phrases.Remove(phrase);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return phrase;
         }
 
         private bool PhraseExists(int id)
         {
-            return _context.Phrase.Any(e => e.Id == id);
+            return _context.Phrases.Any(e => e.Id == id);
         }
     }
 }

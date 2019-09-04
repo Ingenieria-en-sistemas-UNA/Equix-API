@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
 
 namespace EquixAPI.Controllers
 {
-    public class AuthorsController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthorsController : ControllerBase
     {
         private readonly EquixAPIContext _context;
 
@@ -19,135 +21,86 @@ namespace EquixAPI.Controllers
             _context = context;
         }
 
-        // GET: Authors
-        public async Task<IActionResult> Index()
+        // GET: api/Authors
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
         {
-            return View(await _context.Author.ToListAsync());
+            return await _context.Authors.ToListAsync();
         }
 
-        // GET: Authors/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Authors/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Author>> GetAuthor(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var author = await _context.Authors.FindAsync(id);
 
-            var author = await _context.Author
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (author == null)
             {
                 return NotFound();
             }
 
-            return View(author);
+            return author;
         }
 
-        // GET: Authors/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Authors/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,name")] Author author)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(author);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(author);
-        }
-
-        // GET: Authors/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var author = await _context.Author.FindAsync(id);
-            if (author == null)
-            {
-                return NotFound();
-            }
-            return View(author);
-        }
-
-        // POST: Authors/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,name")] Author author)
+        // PUT: api/Authors/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAuthor(int id, Author author)
         {
             if (id != author.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(author).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(author);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AuthorExists(author.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(author);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AuthorExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Authors/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/Authors
+        [HttpPost]
+        public async Task<ActionResult<Author>> PostAuthor(Author author)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            _context.Authors.Add(author);
+            await _context.SaveChangesAsync();
 
-            var author = await _context.Author
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
+        }
+
+        // DELETE: api/Authors/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Author>> DeleteAuthor(int id)
+        {
+            var author = await _context.Authors.FindAsync(id);
             if (author == null)
             {
                 return NotFound();
             }
 
-            return View(author);
-        }
-
-        // POST: Authors/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var author = await _context.Author.FindAsync(id);
-            _context.Author.Remove(author);
+            _context.Authors.Remove(author);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return author;
         }
 
         private bool AuthorExists(int id)
         {
-            return _context.Author.Any(e => e.Id == id);
+            return _context.Authors.Any(e => e.Id == id);
         }
     }
 }

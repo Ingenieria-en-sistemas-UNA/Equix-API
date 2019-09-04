@@ -14,10 +14,10 @@ namespace EquixAPI.Models
         {
         }
 
-        public DbSet<EquixAPI.Entities.Phrase> Phrase { get; set; }
+        public DbSet<Phrase> Phrases { get; set; }
 
-        public DbSet<EquixAPI.Entities.Author> Author { get; set; }
+        public DbSet<Author> Authors { get; set; }
 
-        public DbSet<EquixAPI.Entities.Category> Category { get; set; }
+        public DbSet<Category> Categories { get; set; }
     }
 }
