@@ -10,8 +10,8 @@ namespace EquixAPI.Models
         public int Id { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
-        public OutCategoryDTO OutCategoryDTO{ get; set; }
-        public OutAuthorDTO OutAuthorDTO { get; set; }
+        public OutCategoryDTO Category{ get; set; }
+        public OutAuthorDTO Author { get; set; }
     }
 
 }
