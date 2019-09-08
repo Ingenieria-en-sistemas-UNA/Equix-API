@@ -58,6 +58,7 @@ namespace EquixAPI
             app.UseSignalR(x =>
             {
                 x.MapHub<PhraseHub>("/phraseHub");
+                x.MapHub<CategoryHub>("/categoryHub");
             });
             app.UseMvc();
         }
