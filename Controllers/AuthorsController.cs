@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
+using AutoMapper;
 
 namespace EquixAPI.Controllers
 {
@@ -15,22 +16,25 @@ namespace EquixAPI.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly EquixAPIContext _context;
+        private readonly IMapper _mapper;
 
-        public AuthorsController(EquixAPIContext context)
+        public AuthorsController(EquixAPIContext context, IMapper mapper)
         {
             _context = context;
+            this._mapper = mapper;
         }
 
         // GET: api/Authors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Author>>> GetAuthor()
+        public async Task<ActionResult<IEnumerable<OutAuthorDTO>>> GetAuthor()
         {
-            return await _context.Authors.Include(x => x.phrases).ToListAsync();
+            var authors = await _context.Authors.Include(x => x.Phrases).ToListAsync();
+            return _mapper.Map<List<OutAuthorDTO>>(authors);
         }
 
         // GET: api/Authors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Author>> GetAuthor(int id)
+        public async Task<ActionResult<OutAuthorDTO>> GetAuthor(int id)
         {
             var author = await _context.Authors.FindAsync(id);
 
@@ -39,18 +43,15 @@ namespace EquixAPI.Controllers
                 return NotFound();
             }
 
-            return author;
+            return _mapper.Map<OutAuthorDTO>(author);
         }
 
         // PUT: api/Authors/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAuthor(int id, Author author)
+        public async Task<IActionResult> PutAuthor(int id, InAuthorDTO inAuthorDTO)
         {
-            if (id != author.Id)
-            {
-                return BadRequest();
-            }
-
+            var author = _mapper.Map<Author>(inAuthorDTO);
+            author.Id = id;
             _context.Entry(author).State = EntityState.Modified;
 
             try
@@ -74,17 +75,18 @@ namespace EquixAPI.Controllers
 
         // POST: api/Authors
         [HttpPost]
-        public async Task<ActionResult<Author>> PostAuthor(Author author)
+        public async Task<ActionResult<OutAuthorDTO>> PostAuthor(InAuthorDTO inAuthorDTO)
         {
+            var author = _mapper.Map<Author>(inAuthorDTO);
             _context.Authors.Add(author);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAuthor", new { id = author.Id }, author);
+            return CreatedAtAction("GetAuthor", new { id = author.Id }, _mapper.Map<OutAuthorDTO>(author));
         }
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Author>> DeleteAuthor(int id)
+        public async Task<ActionResult<OutAuthorDTO>> DeleteAuthor(int id)
         {
             var author = await _context.Authors.FindAsync(id);
             if (author == null)
@@ -95,7 +97,7 @@ namespace EquixAPI.Controllers
             _context.Authors.Remove(author);
             await _context.SaveChangesAsync();
 
-            return author;
+            return _mapper.Map<OutAuthorDTO>(author);
         }
 
         private bool AuthorExists(int id)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
+using AutoMapper;
 
 namespace EquixAPI.Controllers
 {
@@ -15,22 +16,25 @@ namespace EquixAPI.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly EquixAPIContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(EquixAPIContext context)
+        public CategoriesController(EquixAPIContext context, IMapper mapper)
         {
             _context = context;
+            this._mapper = mapper;
         }
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategory()
+        public async Task<ActionResult<IEnumerable<OutCategoryDTO>>> GetCategory()
         {
-            return await _context.Categories.ToListAsync();
+            var categories = await _context.Categories.ToListAsync();
+            return _mapper.Map<List<OutCategoryDTO>>(categories);
         }
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<ActionResult<OutCategoryDTO>> GetCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
 
@@ -39,20 +43,16 @@ namespace EquixAPI.Controllers
                 return NotFound();
             }
 
-            return category;
+            return _mapper.Map<OutCategoryDTO>(category);
         }
 
         // PUT: api/Categories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(int id, InCategoryDTO inCategoryDTO)
         {
-            if (id != category.Id)
-            {
-                return BadRequest();
-            }
-
+            var category = _mapper.Map<Category>(inCategoryDTO);
+            category.Id = id;
             _context.Entry(category).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -74,17 +74,18 @@ namespace EquixAPI.Controllers
 
         // POST: api/Categories
         [HttpPost]
-        public async Task<ActionResult<Category>> PostCategory(Category category)
+        public async Task<ActionResult<OutCategoryDTO>> PostCategory(InCategoryDTO inCategoryDTO)
         {
+            var category = _mapper.Map<Category>(inCategoryDTO);
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCategory", new { id = category.Id }, category);
+            return CreatedAtAction("GetCategory", new { id = category.Id }, _mapper.Map<OutCategoryDTO>(category));
         }
 
         // DELETE: api/Categories/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Category>> DeleteCategory(int id)
+        public async Task<ActionResult<OutCategoryDTO>> DeleteCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
             if (category == null)
@@ -95,7 +96,7 @@ namespace EquixAPI.Controllers
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
 
-            return category;
+            return _mapper.Map<OutCategoryDTO>(category);
         }
 
         private bool CategoryExists(int id)
