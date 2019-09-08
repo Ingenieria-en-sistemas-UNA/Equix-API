@@ -9,5 +9,6 @@ namespace EquixAPI.Models
     {
         public string Token { set; get; }
         public DateTime Expiration{ get; set; }
+        public OutAuthorDTO Author { get; set; }
     }
 }

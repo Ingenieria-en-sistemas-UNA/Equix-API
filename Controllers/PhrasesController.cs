@@ -21,7 +21,6 @@ namespace EquixAPI.Controllers
     {
         private readonly EquixAPIContext _context;
        
-        public PhrasesController(EquixAPIContext context)
         private readonly IMapper _mapper;
 
         public PhrasesController(EquixAPIContext context, IMapper mapper)

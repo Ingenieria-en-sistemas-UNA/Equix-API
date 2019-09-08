@@ -11,8 +11,7 @@ namespace EquixAPI.Models
     {
         public string Email { get; set; }
         public string Password { set; get; }
-        public int AuthorId { get; set; }
-        public Author Author { get; set; }
+        public InAuthorDTO Author { get; set; }
 
     }
 
