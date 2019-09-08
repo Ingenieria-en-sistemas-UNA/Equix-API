@@ -1,3 +1,23 @@
+﻿﻿    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.HttpsPolicy;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
+    using Microsoft.EntityFrameworkCore;
+    using EquixAPI.Models;
+    using EquixAPI.Hubs;
+    using EquixAPI.Entities;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,34 +35,46 @@ using EquixAPI.Models;
 using EquixAPI.Hubs;
 using AutoMapper;
 
-namespace EquixAPI
-{
-    public class Startup
+    namespace EquixAPI
     {
+        public class Startup
+        {
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get;}
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<EquixAPIContext>(options => options.UseSqlServer(Configuration.GetConnectionString("EquixAPIContext")));
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<EquixAPIContext>()
+                .AddDefaultTokenProviders();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-                .AddJsonOptions(options => 
+                .AddJsonOptions(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-
-            services.AddDbContext<EquixAPIContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("EquixAPIContext")));
-
             services.AddSignalR();
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    options.TokenValidationParameters = new TokenValidationParameters
+            {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(Configuration["jwt:key"])),
+            ClockSkew = TimeSpan.Zero
+            });
             services.AddAutoMapper(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -60,6 +92,7 @@ namespace EquixAPI
                 x.MapHub<PhraseHub>("/phraseHub");
                 x.MapHub<CategoryHub>("/categoryHub");
             });
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
 using EquixAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.DataProtection;
 using AutoMapper;
 
 namespace EquixAPI.Controllers
@@ -16,6 +20,8 @@ namespace EquixAPI.Controllers
     public class PhrasesController : ControllerBase
     {
         private readonly EquixAPIContext _context;
+       
+        public PhrasesController(EquixAPIContext context)
         private readonly IMapper _mapper;
 
         public PhrasesController(EquixAPIContext context, IMapper mapper)
@@ -37,11 +43,12 @@ namespace EquixAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Phrase>> GetPhrase(int id)
         {
-            var phrase = await _context.Phrases.FindAsync(id);
+
+            var phrase = await _context.Phrases.FindAsync(id);  
 
             if (phrase == null)
             {
-                return NotFound();
+               return NotFound();
             }
 
             return phrase;

@@ -4,14 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using EquixAPI.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace EquixAPI.Models
 {
-    public class EquixAPIContext : DbContext
+    public class EquixAPIContext : IdentityDbContext<ApplicationUser>
     {
         public EquixAPIContext (DbContextOptions<EquixAPIContext> options)
             : base(options)
         {
+
         }
 
         public DbSet<Phrase> Phrases { get; set; }
