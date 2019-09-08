@@ -66,7 +66,6 @@ namespace EquixAPI.Controllers
         {
             var result = await _signInManager.PasswordSignInAsync(userInfo.Email, userInfo.Password, isPersistent: false, lockoutOnFailure: false);
             var user = _context.Users.Include(x => x.Author).SingleOrDefault(x => x.Email == userInfo.Email );
-            //var author = await _context.Authors.FindAsync(user.AuthorId);
             if (result.Succeeded)
             {
                 return Ok(new { ok = true, data = BuildToken(userInfo, user.Author) });
