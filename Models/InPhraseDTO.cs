@@ -9,7 +9,7 @@ namespace EquixAPI.Models
     {
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
-        public InCategoryDTO Category { get; set; }
-        public InAuthorDTO Author { get; set; }
+        public OutCategoryDTO Category { get; set; }
+        public OutAuthorDTO Author { get; set; }
     }
 }

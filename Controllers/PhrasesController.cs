@@ -79,6 +79,8 @@ namespace EquixAPI.Controllers
         public async Task<ActionResult<OutPhraseDTO>> PostPhrase([FromBody] InPhraseDTO inPhraseDTO)
         {
             var phrase = _mapper.Map<Phrase>(inPhraseDTO);
+            phrase.Author = await _context.Authors.FindAsync(phrase.AuthorId);
+            phrase.Category = await _context.Categories.FindAsync(phrase.CategoryId);
             _context.Phrases.Add(phrase);
             await _context.SaveChangesAsync();
 
